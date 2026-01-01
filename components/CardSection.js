@@ -3,6 +3,10 @@ export class CardSection extends HTMLElement {
     super();
   }
 
+  render() {
+    
+  }
+
   connectedCallback() {
     const ner = this.getAttribute("fname") ?? "-";
     this.innerHTML = `
