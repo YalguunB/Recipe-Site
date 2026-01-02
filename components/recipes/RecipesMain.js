@@ -15,7 +15,7 @@ export class RecipesMain extends HTMLElement {
         </section>
 
         <section class="selected-cat">
-          <h2>Бүх хоол</h2>
+          <h2 class="type-name">Бүх хоол</h2>
           <section class="all-recipes"></section>
         </section>
       </main>
