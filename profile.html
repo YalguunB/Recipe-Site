@@ -14,13 +14,13 @@
 </head>
 <body>
   <header-section></header-section>
-  
+
   <aside>
     <article>
-        <img src="images/profile.jpg" alt="profile picture">
+        <img class="img-profile" src="images/profile.jpg" alt="profile picture">
         <h2>Миний Мэдээлэл</h2>
         <hr>
-        <ul style="list-style-type: none;">
+        <ul class="info" style="list-style-type: none;">
             <li>Username:</li>
             <li>Username123</li>
             <li>Email:</li>
@@ -33,7 +33,7 @@
   <section>
     <food-section title="Хадгалсан жорууд" category="saved"></food-section>
     <food-section title="Оруулсан жорууд" category="added"></food-section>
-    <article>
+    <article class="form">
         <form action="/submit" method="post">
             <label for="name">Хоолны нэр</label><br>
             <input type="text" id="name" name="name" value="Хоолны нэр"><br>
@@ -57,6 +57,7 @@
         </form>
     </article>
   </section>
+
   <footer-section></footer-section>
   <script type="module" src="./components/init.js"></script>
 </body>
