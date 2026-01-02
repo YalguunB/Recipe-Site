@@ -36,19 +36,16 @@ export class HeaderSection extends HTMLElement {
       recipes.loadFoods();
     };
 
-    // SPA хайлт
     searchInput.addEventListener("input", async (e) => {
       const query = e.target.value.toLowerCase();
 
       const res = await fetch("./data/info.json");
       const foods = await res.json();
 
-      // Нэр эсвэл type-д query байгаа хоолуудыг шүүж авна
       const filtered = foods.filter(f => 
         f.name.toLowerCase().includes(query) || f.type.toLowerCase().includes(query)
       );
 
-      // Нүүр хуудас болон Жорууд дээр харуулах
       home.style.display = "none";
       recipes.style.display = "block";
       recipeInfo.style.display = "none";

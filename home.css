@@ -519,7 +519,14 @@ footer {
             text-decoration: none;
             color: black;
             font-size: 1rem;
+            &:active {
+                color: #FF8C42;
+            }
         }
+    }
+
+    .selected-cat h2 {
+        font-family: 'pattaya';
     }
 
     .category a {
