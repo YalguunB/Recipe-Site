@@ -43,6 +43,18 @@ export class CardSection extends HTMLElement {
         </section>
     </article>
     `;
+    this.addEventListener('click', () => {
+        const recipeInfo = document.getElementById('recipe');
+        const home = document.getElementById('home');
+        const recipes = document.getElementById('recipes');
+
+        home.style.display = 'none';
+        recipes.style.display = 'none';
+        recipeInfo.style.display = 'block';
+
+        const id = Number(this.getAttribute('id'));
+        recipeInfo.showRecipe(id);
+    });
   }
 }
 customElements.define('card-section', CardSection);

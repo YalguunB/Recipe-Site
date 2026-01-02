@@ -1,5 +1,6 @@
 [
   {
+    "id": 1,
     "category": "weekly",
     "rating": 4.8,
     "name": "Пицца",
@@ -11,6 +12,7 @@
     "view": "10k"
   },
   {
+    "id": 2,
     "category": "weekly",
     "rating": 4.5,
     "name": "Бууз",
@@ -22,6 +24,7 @@
     "view": "11k"
   },
   {
+    "id": 3,
     "category": "weekly",
     "rating": 4.7,
     "name": "Рамен",
@@ -33,6 +36,7 @@
     "view": "12k"
   },
   {
+    "id": 4,
     "category": "weekly",
     "rating": 4.6,
     "name": "Хуушуур",
@@ -44,6 +48,7 @@
     "view": "13k"
   },
   {
+    "id": 5,
     "category": "asian",
     "rating": 4.9,
     "name": "Суши",
@@ -55,6 +60,7 @@
     "view": "9k"
   },
   {
+    "id": 6,
     "category": "asian",
     "rating": 4.8,
     "name": "Удон",
@@ -66,6 +72,7 @@
     "view": "8k"
   },
   {
+    "id": 7,
     "category": "asian",
     "rating": 4.7,
     "name": "Карри",
@@ -77,6 +84,7 @@
     "view": "1k"
   },
   {
+    "id": 8,
     "category": "asian",
     "rating": 4.6,
     "name": "Төмсний хучмал",
@@ -88,6 +96,7 @@
     "view": "10k"
   },
   {
+    "id": 9,
     "category": "popular",
     "rating": 5.0,
     "name": "Загас",
@@ -99,6 +108,7 @@
     "view": "20k"
   },
   {
+    "id": 10,
     "category": "popular",
     "rating": 4.9,
     "name": "Паста",
@@ -110,6 +120,7 @@
     "view": "18k"
   },
   {
+    "id": 11,
     "category": "popular",
     "rating": 4.8,
     "name": "Тахиа",
@@ -121,6 +132,7 @@
     "view": "9k"
   },
   {
+    "id": 12,
     "category": "popular",
     "rating": 4.7,
     "name": "Бургер",
@@ -130,8 +142,9 @@
     "cal": 350,
     "image": "images/food-images/burger.jpg",
     "view": "15k"
-  },
+  }, 
   {
+    "id": 13,
     "category": "weekly",
     "rating": 4.8,
     "name": "Пицца",
@@ -143,6 +156,7 @@
     "view": "10k"
   },
   {
+    "id": 14,
     "category": "weekly",
     "rating": 4.5,
     "name": "Бууз",
@@ -154,6 +168,7 @@
     "view": "11k"
   },
   {
+    "id": 15,
     "category": "weekly",
     "rating": 4.7,
     "name": "Рамен",
@@ -165,6 +180,7 @@
     "view": "12k"
   },
   {
+    "id": 16,
     "category": "weekly",
     "rating": 4.6,
     "name": "Хуушуур",
@@ -176,6 +192,7 @@
     "view": "13k"
   },
   {
+    "id": 17,
     "category": "asian",
     "rating": 4.9,
     "name": "Суши",
@@ -187,6 +204,7 @@
     "view": "9k"
   },
   {
+    "id": 18,
     "category": "asian",
     "rating": 4.8,
     "name": "Удон",
@@ -198,6 +216,7 @@
     "view": "8k"
   },
   {
+    "id": 19,
     "category": "asian",
     "rating": 4.7,
     "name": "Карри",
@@ -209,6 +228,7 @@
     "view": "1k"
   },
   {
+    "id": 20,
     "category": "asian",
     "rating": 4.6,
     "name": "Төмсний хучмал",
@@ -220,6 +240,7 @@
     "view": "10k"
   },
   {
+    "id": 21,
     "category": "popular",
     "rating": 5.0,
     "name": "Загас",
@@ -231,6 +252,7 @@
     "view": "20k"
   },
   {
+    "id": 22,
     "category": "popular",
     "rating": 4.9,
     "name": "Паста",
@@ -242,6 +264,7 @@
     "view": "18k"
   },
   {
+    "id": 23,
     "category": "popular",
     "rating": 4.8,
     "name": "Тахиа",
@@ -253,6 +276,7 @@
     "view": "9k"
   },
   {
+    "id": 24,
     "category": "popular",
     "rating": 4.7,
     "name": "Бургер",
