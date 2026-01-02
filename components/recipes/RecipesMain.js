@@ -15,7 +15,6 @@ export class RecipesMain extends HTMLElement {
 
     const catRes = await fetch("./data/categories-info.json");
     const categories = await catRes.json();
-
     const catBox = this.querySelector(".category");
 
     categories.forEach(cat => {
@@ -43,10 +42,11 @@ export class RecipesMain extends HTMLElement {
 
     this.querySelector(".all-recipes").innerHTML = foods.map(f => `
       <card-section
+        id="${f.id}"
         name="${f.name}"
         type="${f.type}"
         rating="${f.rating}"
-        views="${f.view}"
+        view="${f.view}"
         time="${f.time}"
         portion="${f.portion}"
         cal="${f.cal}"

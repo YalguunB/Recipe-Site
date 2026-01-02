@@ -24,6 +24,7 @@ export class FoodsSection extends HTMLElement {
             filteredData.map(f => 
               `<card-section 
                  <card-section 
+                  id="${f.id}"
                   name="${f.name}"
                   type="${f.type}"
                   rating="${f.rating}"
