@@ -1,7 +1,9 @@
-import './index/HeaderSection.js';
-import './index/MainSection.js';
-import './index/FooterSection.js';
-import './index/FoodsSection.js';
-import './index/CardSection.js';
+import './base-components/HeaderSection.js';
+import './base-components/MainSection.js';
+import './base-components/FooterSection.js';
+import './foods-card/FoodsSection.js';
+import './foods-card/CardSection.js';
 import './recipes/RecipesMain.js';
 import './recipe-info/RecipeInfo.js';
+import './login/LoginModal.js';
+import './profile/ProfileMain.js';
