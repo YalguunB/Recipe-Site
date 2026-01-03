@@ -1,60 +1,157 @@
 export class CardSection extends HTMLElement {
   constructor() {
     super();
+    this.cardData = {};
   }
 
   connectedCallback() {
-    const name = this.getAttribute("name") ?? "-";
-    const type = this.getAttribute("type") ?? "-";
-    const rating = Number(this.getAttribute("rating") ?? 0).toFixed(1);
-    const time = this.getAttribute("time") ?? "-";
-    const portion = this.getAttribute("portion") ?? "-";
-    const cal = this.getAttribute("cal") ?? "-";
-    const view = this.getAttribute("view") ?? 0;
-    const image = this.getAttribute("image") ?? "images/food-images/default.jpg";
+    this.initializeData();
+    this.render();
+    this.attachEventListeners();
+  }
 
-    this.innerHTML = `
-    <article class="cards">
-        <img class="food-image" src="${image}" alt="food-images">
-        <section class="type-rate">
-            <h4>${type}</h4>
-            <article class="rate">
-                <img src="images/food.svg" alt="food-image">
-                <p>
-                    ${rating}
-                    <span>(${view})</span>
-                </p>
-            </article>
-        </section>
-        <h3 class="food-name">${name}</h3>
-        <section class="time-member-kalore">
-            <section>
-                <img src="images/time.svg" alt="time-icon">
-                <span>${time} мин</span>
-            </section>
-            <section>
-                <img src="images/people.svg" alt="people-icon">
-                <span>${portion}</span>
-            </section>
-            <section>
-                <img src="images/calore.svg" alt="calore-icon">
-                <span>${cal} ккал</span>
-            </section>
-        </section>
-    </article>
+  // Attributes-аас өгөгдөл авах
+  initializeData() {
+    this.cardData = {
+      id: this.getAttribute("id"),
+      name: this.getAttribute("name") ?? "-",
+      type: this.getAttribute("type") ?? "-",
+      rating: this.formatRating(this.getAttribute("rating")),
+      time: this.getAttribute("time") ?? "-",
+      portion: this.getAttribute("portion") ?? "-",
+      cal: this.getAttribute("cal") ?? "-",
+      view: this.getAttribute("view") ?? 0,
+      image: this.getAttribute("image") ?? "images/food-images/default.jpg"
+    };
+  }
+
+  // Rating форматлах
+  formatRating(rating) {
+    return Number(rating ?? 0).toFixed(1);
+  }
+
+  // Card header HTML
+  createHeaderHTML() {
+    return `
+      <img class="food-image" src="${this.cardData.image}" alt="${this.cardData.name}">
     `;
-    this.addEventListener('click', () => {
-        const recipeInfo = document.getElementById('recipe');
-        const home = document.getElementById('home');
-        const recipes = document.getElementById('recipes');
+  }
 
-        home.style.display = 'none';
-        recipes.style.display = 'none';
-        recipeInfo.style.display = 'block';
+  // Type болон rating HTML
+  createTypeRatingHTML() {
+    return `
+      <section class="type-rate">
+        <h4>${this.cardData.type}</h4>
+        <article class="rate">
+          <img src="images/food.svg" alt="food-image">
+          <p>
+            ${this.cardData.rating}
+            <span>(${this.cardData.view})</span>
+          </p>
+        </article>
+      </section>
+    `;
+  }
 
-        const id = Number(this.getAttribute('id'));
-        recipeInfo.showRecipe(id);
-    });
+  // Хоолны нэр HTML
+  createNameHTML() {
+    return `<h3 class="food-name">${this.cardData.name}</h3>`;
+  }
+
+  // Хугацаа, порц, калори HTML
+  createDetailsHTML() {
+    return `
+      <section class="time-member-kalore">
+        ${this.createDetailItem("images/time.svg", "time-icon", `${this.cardData.time} мин`)}
+        ${this.createDetailItem("images/people.svg", "people-icon", this.cardData.portion)}
+        ${this.createDetailItem("images/calore.svg", "calore-icon", `${this.cardData.cal} ккал`)}
+      </section>
+    `;
+  }
+
+  // Detail item үүсгэх
+  createDetailItem(icon, alt, text) {
+    return `
+      <section>
+        <img src="${icon}" alt="${alt}">
+        <span>${text}</span>
+      </section>
+    `;
+  }
+
+  // Бүрэн HTML
+  createCardHTML() {
+    return `
+      <article class="cards">
+        ${this.createHeaderHTML()}
+        ${this.createTypeRatingHTML()}
+        ${this.createNameHTML()}
+        ${this.createDetailsHTML()}
+      </article>
+    `;
+  }
+
+  // DOM элементүүд авах
+  getElements() {
+    return {
+      recipeInfo: document.getElementById('recipe'),
+      home: document.getElementById('home'),
+      recipes: document.getElementById('recipes'),
+      profileSection: document.querySelector('profile-main')
+    };
+  }
+
+  // Бүх секшн хаах
+  hideAllSections(elements) {
+    if (elements.home) elements.home.style.display = 'none';
+    if (elements.recipes) elements.recipes.style.display = 'none';
+    if (elements.profileSection) elements.profileSection.style.display = 'none';
+  }
+
+  // Recipe харуулах
+  showRecipe(recipeInfo) {
+    const recipeId = Number(this.cardData.id);
+    
+    if (typeof recipeInfo.showRecipe === 'function') {
+      recipeInfo.showRecipe(recipeId);
+    } else {
+      console.error('showRecipe функц олдсонгүй');
+    }
+  }
+
+  // Card дарахад
+  handleCardClick() {
+    try {
+      const elements = this.getElements();
+
+      if (!elements.recipeInfo) {
+        console.error('recipe элемент олдсонгүй');
+        return;
+      }
+
+      this.hideAllSections(elements);
+      elements.recipeInfo.style.display = 'block';
+      this.showRecipe(elements.recipeInfo);
+      
+    } catch (error) {
+      console.error('Card дарахад алдаа гарлаа:', error);
+    }
+  }
+
+  // Event listeners нэмэх
+  attachEventListeners() {
+    this.addEventListener('click', () => this.handleCardClick());
+  }
+
+  // Render
+  render() {
+    this.innerHTML = this.createCardHTML();
+  }
+
+  // Cleanup
+  disconnectedCallback() {
+    // Event listener автоматаар устгагдана
   }
 }
+
 customElements.define('card-section', CardSection);

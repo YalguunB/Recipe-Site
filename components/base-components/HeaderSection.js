@@ -1,115 +1,310 @@
 export class HeaderSection extends HTMLElement {
+  constructor() {
+    super();
+    this.elements = {};
+    this.eventListeners = [];
+    this.searchTimeout = null;
+  }
+
   connectedCallback() {
-    this.innerHTML = `
+    this.render();
+    this.cacheElements();
+    this.checkAuthentication();
+    this.attachEventListeners();
+  }
+
+  disconnectedCallback() {
+    this.cleanupEventListeners();
+  }
+
+  // HTML бүтэц үүсгэх
+  createHTML() {
+    return `
       <header>
-        <a href="#"><img class="logo" src="images/icon-images/logo.png"></a>
-        <nav>
-          <a class="nav-home" href="#">Нүүр хуудас</a>
-          <a class="nav-recipes" href="#">Жорууд</a>
-        </nav>
-        <section class="nevtreh-search">
-          <input type="text" placeholder="Хайх..." class="search-input">
-          <img class="search-logo" src="images/icon-images/search-logo.svg">
-          <button class="login-btn">Нэвтрэх</button>
-          <button class="more-search">Дэлгэрэнгүй хайлт</button>
-        </section>
+        ${this.createLogoHTML()}
+        ${this.createNavHTML()}
+        ${this.createSearchSectionHTML()}
       </header>
     `;
+  }
 
-    const home = document.querySelector("#home");
-    const recipes = document.querySelector("#recipes");
-    const recipeInfo = document.querySelector("#recipe");
-    const searchInput = this.querySelector(".search-input");
-    const searchSection = this.querySelector(".nevtreh-search");
-    const loginBtn = this.querySelector(".login-btn");
-    const loginModal = document.querySelector("login-modal");
-    const profileSection = document.querySelector("profile-main"); // ProfileMain.js компонент
+  // Logo HTML
+  createLogoHTML() {
+    return `
+      <a href="#" class="logo-link">
+        <img class="logo" src="images/icon-images/logo.png" alt="Logo">
+      </a>
+    `;
+  }
 
-    // Хэрэглэгч нэвтэрсэн эсэхийг шалгах
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      // login товчийг устгах
-      if (loginBtn) loginBtn.remove();
+  // Navigation HTML
+  createNavHTML() {
+    return `
+      <nav>
+        <a class="nav-home" href="#">Нүүр хуудас</a>
+        <a class="nav-recipes" href="#">Жорууд</a>
+      </nav>
+    `;
+  }
 
-      // profile товч нэмэх
-      const profileBtn = document.createElement("button");
-      profileBtn.classList.add("profile-btn");
-      profileBtn.innerHTML = `<img src="images/icon-images/profile.svg" alt="profile">`;
-      searchSection.insertBefore(profileBtn, searchSection.querySelector(".more-search"));
+  // Search section HTML
+  createSearchSectionHTML() {
+    return `
+      <section class="nevtreh-search">
+        <input type="text" placeholder="Хайх..." class="search-input">
+        <img class="search-logo" src="images/icon-images/search-logo.svg" alt="Search">
+        <button class="login-btn enter-btn">Нэвтрэх</button>
+        <button class="more-search">Дэлгэрэнгүй хайлт</button>
+      </section>
+    `;
+  }
 
-      // profile товч дээр дарахад profile-main-г харуулах
-      profileBtn.addEventListener("click", () => {
-        if (!profileSection) return;
+  // DOM элементүүдийг cache хийх
+  cacheElements() {
+    this.elements = {
+      home: document.querySelector("#home"),
+      recipes: document.querySelector("#recipes"),
+      recipeInfo: document.querySelector("#recipe"),
+      searchInput: this.querySelector(".search-input"),
+      searchSection: this.querySelector(".nevtreh-search"),
+      loginBtn: this.querySelector(".login-btn"),
+      loginModal: document.querySelector("login-modal"),
+      profileSection: document.querySelector("profile-main"),
+      homeLink: this.querySelector(".nav-home"),
+      recipesLink: this.querySelector(".nav-recipes")
+    };
+  }
 
-        // Бусад секшнүүдийг хаах
-        home.style.display = "none";
-        recipes.style.display = "none";
-        recipeInfo.style.display = "none";
+  //Хэрэглэгчийн нэвтэрсэн эсэхийг шалгах
+  isUserLoggedIn() {
+    return !!localStorage.getItem("userId");
+  }
 
-        // profile-main-г харуулах
-        profileSection.style.display = "block";
-        if (profileSection.showProfile) profileSection.showProfile(); // showProfile функц ProfileMain.js-д байх
-      });
+  // Profile товч үүсгэх
+  createProfileButton() {
+    const profileBtn = document.createElement("button");
+    profileBtn.classList.add("profile-btn");
+    profileBtn.innerHTML = `<img class="profile-button" src="images/icon-images/profile.svg" alt="profile">`;
+    return profileBtn;
+  }
+
+  // Profile товч оруулах
+  insertProfileButton(profileBtn) {
+    const moreSearchBtn = this.elements.searchSection?.querySelector(".more-search");
+    if (this.elements.searchSection && moreSearchBtn) {
+      this.elements.searchSection.insertBefore(profileBtn, moreSearchBtn);
+    }
+  }
+
+  // Profile товч event нэмэх
+  addProfileButtonListener(profileBtn) {
+    const handler = () => this.showProfile();
+    profileBtn.addEventListener("click", handler);
+    this.eventListeners.push({ element: profileBtn, event: "click", handler });
+  }
+
+  // Authentication шалгах
+  checkAuthentication() {
+    if (!this.isUserLoggedIn()) return;
+
+    if (this.elements.loginBtn) {
+      this.elements.loginBtn.remove();
     }
 
-    // Нүүр хуудас товч
-    this.querySelector(".nav-home").onclick = (e) => {
-      e.preventDefault();
-      home.style.display = "block";
-      recipes.style.display = "none";
-      recipeInfo.style.display = "none";
-      if (profileSection) profileSection.style.display = "none";
-    };
+    const profileBtn = this.createProfileButton();
+    this.insertProfileButton(profileBtn);
+    this.addProfileButtonListener(profileBtn);
+  }
 
-    // Жорууд товч
-    this.querySelector(".nav-recipes").onclick = (e) => {
-      e.preventDefault();
-      home.style.display = "none";
-      recipes.style.display = "block";
-      recipeInfo.style.display = "none";
-      if (profileSection) profileSection.style.display = "none";
-      recipes.loadFoods();
-    };
-
-    // Хайлт
-    searchInput.addEventListener("input", async (e) => {
-      const query = e.target.value.toLowerCase();
-
-      const res = await fetch("./data/info.json");
-      const foods = await res.json();
-
-      const filtered = foods.filter(f =>
-        f.name.toLowerCase().includes(query) ||
-        f.type.toLowerCase().includes(query)
-      );
-
-      home.style.display = "none";
-      recipes.style.display = "block";
-      recipeInfo.style.display = "none";
-      if (profileSection) profileSection.style.display = "none";
-
-      recipes.querySelector(".all-recipes").innerHTML = filtered.map(f => `
-        <card-section
-          id="${f.id}"
-          name="${f.name}"
-          type="${f.type}"
-          rating="${f.rating}"
-          view="${f.view}"
-          time="${f.time}"
-          portion="${f.portion}"
-          cal="${f.cal}"
-          image="${f.image}">
-        </card-section>
-      `).join("");
+  hideAllSections() {
+    const sections = ['home', 'recipes', 'recipeInfo', 'profileSection'];
+    sections.forEach(section => {
+      if (this.elements[section]) {
+        this.elements[section].style.display = "none";
+      }
     });
+  }
 
-    // Нэвтрэх товч
-    if (loginBtn) {
-      loginBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (loginModal) loginModal.open();
-      });
+  showProfile() {
+    if (!this.elements.profileSection) {
+      console.error('Элемент олдсонгүй');
+      return;
     }
+
+    this.hideAllSections();
+    this.elements.profileSection.style.display = "block";
+    
+    if (typeof this.elements.profileSection.showProfile === 'function') {
+      this.elements.profileSection.showProfile();
+    }
+  }
+
+  showHome() {
+    this.hideAllSections();
+    if (this.elements.home) {
+      this.elements.home.style.display = "block";
+    }
+  }
+
+  showRecipes() {
+    this.hideAllSections();
+    if (this.elements.recipes) {
+      this.elements.recipes.style.display = "block";
+      if (typeof this.elements.recipes.loadFoods === 'function') {
+        this.elements.recipes.loadFoods();
+      }
+    }
+  }
+
+  openLoginModal() {
+    if (this.elements.loginModal && typeof this.elements.loginModal.open === 'function') {
+      this.elements.loginModal.open();
+    }
+  }
+
+  async fetchFoods() {
+    const response = await fetch("./data/info.json");
+    
+    if (!response.ok) {
+      throw new Error('Хайлт хийхэд алдаа гарлаа');
+    }
+    
+    return await response.json();
+  }
+
+  filterFoodsByQuery(foods, query) {
+    return foods.filter(f =>
+      f.name.toLowerCase().includes(query) ||
+      f.type.toLowerCase().includes(query)
+    );
+  }
+
+  // Food card HTML үүсгэх
+  createFoodCard(food) {
+    return `
+      <card-section
+        id="${food.id}"
+        name="${food.name}"
+        type="${food.type}"
+        rating="${food.rating}"
+        view="${food.view}"
+        time="${food.time}"
+        portion="${food.portion}"
+        cal="${food.cal}"
+        image="${food.image}">
+      </card-section>
+    `;
+  }
+
+  // Хайлтын үр дүн харуулах
+  renderSearchResults(filteredFoods, query) {
+    const container = this.elements.recipes?.querySelector(".all-recipes");
+    if (!container) return;
+
+    if (filteredFoods.length === 0) {
+      container.innerHTML = `
+        <p style="text-align: center; width: 100%; padding: 2rem; color: #777;">
+          "${query}" хайлтын үр дүн олдсонгүй.
+        </p>
+      `;
+      return;
+    }
+
+    container.innerHTML = filteredFoods.map(f => this.createFoodCard(f)).join("");
+  }
+
+  // Хайлт хийх
+  async performSearch(query) {
+    try {
+      const trimmedQuery = query.trim().toLowerCase();
+      
+      if (!trimmedQuery) {
+        this.showRecipes();
+        return;
+      }
+
+      const foods = await this.fetchFoods();
+      const filteredFoods = this.filterFoodsByQuery(foods, trimmedQuery);
+
+      this.hideAllSections();
+      if (this.elements.recipes) {
+        this.elements.recipes.style.display = "block";
+      }
+
+      this.renderSearchResults(filteredFoods, trimmedQuery);
+      
+    } catch (error) {
+      console.error('Хайлтад алдаа гарлаа:', error);
+      alert('Хайлт хийхэд алдаа гарлаа. Дахин оролдоно уу.');
+    }
+  }
+
+  handleSearchInput(e) {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.performSearch(e.target.value);
+    }, 300);
+  }
+
+  handleHomeClick(e) {
+    e.preventDefault();
+    this.showHome();
+  }
+
+  handleRecipesClick(e) {
+    e.preventDefault();
+    this.showRecipes();
+  }
+
+  handleLoginClick(e) {
+    e.preventDefault();
+    this.openLoginModal();
+  }
+
+  registerEventListener(element, event, handler) {
+    if (element) {
+      element.addEventListener(event, handler);
+      this.eventListeners.push({ element, event, handler });
+    }
+  }
+
+  attachEventListeners() {
+    this.registerEventListener(
+      this.elements.homeLink,
+      "click",
+      (e) => this.handleHomeClick(e)
+    );
+
+    this.registerEventListener(
+      this.elements.recipesLink,
+      "click",
+      (e) => this.handleRecipesClick(e)
+    );
+
+    this.registerEventListener(
+      this.elements.searchInput,
+      "input",
+      (e) => this.handleSearchInput(e)
+    );
+
+    this.registerEventListener(
+      this.elements.loginBtn,
+      "click",
+      (e) => this.handleLoginClick(e)
+    );
+  }
+
+  cleanupEventListeners() {
+    this.eventListeners.forEach(({ element, event, handler }) => {
+      if (element) {
+        element.removeEventListener(event, handler);
+      }
+    });
+    this.eventListeners = [];
+  }
+
+  render() {
+    this.innerHTML = this.createHTML();
   }
 }
 

@@ -122,7 +122,7 @@ header {
             opacity: 0.6;
         }
     }
-
+    
     .search-logo:hover {
         opacity: 0.8;
         cursor: pointer;
@@ -645,7 +645,7 @@ footer {
     align-items: center;
     height: 100vh;
     margin: 0;
-    display: none; /* Анх харагдахгүй */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -705,7 +705,7 @@ footer {
 
         button {
             border: none;
-            width: 17.5rem;
+            width: 16.25rem;
             height: 30px;
             border-radius: 2rem;
             font-size: 0.9rem;
