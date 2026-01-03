@@ -3,6 +3,7 @@ export class LoginModal extends HTMLElement {
     super();
     this.overlay = null;
     this.form = null;
+    this.API_BASE_URL = 'http://localhost:3000/api';
   }
 
   connectedCallback() {
@@ -80,43 +81,49 @@ export class LoginModal extends HTMLElement {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  async fetchUsers() {
-    const res = await fetch("./data/security.json");
-    
-    if (!res.ok) {
-      throw new Error('Сервертэй холбогдоход алдаа гарлаа');
-    }
-    
-    return await res.json();
-  }
-
-  findUser(users, email, password) {
-    return users.find(u => u.email === email && u.password === password);
-  }
-
-  saveUserData(user) {
-    localStorage.setItem("userId", user.userId);
-    localStorage.setItem("email", user.email);
-  }
-
+  // THIS IS THE KEY CHANGE - Now calling the backend API instead of reading JSON file
   async performLogin(data) {
     try {
-      const users = await this.fetchUsers();
-      const user = this.findUser(users, data.email, data.password);
+      const response = await fetch(`${this.API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+        })
+      });
 
-      if (!user) {
-        this.showError("Gmail эсвэл нууц үг буруу");
+      const result = await response.json();
+
+      // If login failed
+      if (!response.ok) {
+        this.showError(result.error || "Gmail эсвэл нууц үг буруу");
         return false;
       }
 
-      this.saveUserData(user);
-      this.showSuccess(`Амжилттай нэвтэрлээ: ${user.email}`);
+      // If login succeeded - save ALL the data including token
+      this.saveUserData(result);
+      this.showSuccess(`Амжилттай нэвтэрлээ: ${result.email}`);
       return true;
       
     } catch (err) {
       console.error("Login error:", err);
-      this.showError("Алдаа гарлаа. Дахин оролдоно уу.");
+      this.showError("Серверт холбогдоход алдаа гарлаа. Дахин оролдоно уу.");
       return false;
+    }
+  }
+
+  // THIS IS THE OTHER KEY CHANGE - Now saving the token too!
+  saveUserData(data) {
+    localStorage.setItem("token", data.token);      // ← THIS WAS MISSING!
+    localStorage.setItem("userId", data.userId);
+    localStorage.setItem("email", data.email);
+    
+    // Optional: also save username if backend returns it
+    if (data.username) {
+      localStorage.setItem("username", data.username);
     }
   }
 

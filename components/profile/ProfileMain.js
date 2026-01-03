@@ -241,7 +241,7 @@ export class ProfileMain extends HTMLElement {
 
     // Check if user is logged in
     if (!this.userData.token) {
-      this.showError('Та нэгж нэвтэрнэ үү');
+      this.showError('Та нэвтэрнэ үү');
       return;
     }
 
