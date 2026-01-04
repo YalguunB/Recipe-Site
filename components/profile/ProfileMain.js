@@ -150,13 +150,13 @@ export class ProfileMain extends HTMLElement {
       extras: []
     };
 
-    // Handle image
+    // зураг
     const imageInput = form.querySelector("#image");
     if (imageInput?.files.length > 0) {
       formData.image_url = `images/${imageInput.files[0].name}`;
     }
 
-    // Parse ingredients (split by newline)
+    // орц
     const ingredientsText = form.querySelector("#ingredients").value.trim();
     if (ingredientsText) {
       formData.ingredients = ingredientsText.split('\n')
@@ -164,7 +164,7 @@ export class ProfileMain extends HTMLElement {
         .filter(i => i.length > 0);
     }
 
-    // Parse instructions/steps (split by newline)
+    // алхмууд
     const instructionsText = form.querySelector("#instructions").value.trim();
     if (instructionsText) {
       formData.steps = instructionsText.split('\n')
@@ -172,7 +172,7 @@ export class ProfileMain extends HTMLElement {
         .filter(s => s.length > 0);
     }
 
-    // Parse extra info (split by newline)
+    // нэмэлт мэдээлэл
     const infoText = form.querySelector("#info").value.trim();
     if (infoText) {
       formData.extras = infoText.split('\n')
@@ -239,12 +239,6 @@ export class ProfileMain extends HTMLElement {
   async handleFormSubmit(e) {
     e.preventDefault();
 
-    // Check if user is logged in
-    if (!this.userData.token) {
-      this.showError('Та нэвтэрнэ үү');
-      return;
-    }
-
     const form = e.target;
     const formData = this.collectFormData(form);
 
@@ -256,8 +250,6 @@ export class ProfileMain extends HTMLElement {
     
     if (success) {
       form.reset();
-      // Optionally reload user's recipes section
-      // this.loadUserRecipes();
     }
   }
 
@@ -316,13 +308,11 @@ export class ProfileMain extends HTMLElement {
     this.innerHTML = this.createProfileHTML();
   }
 
-  // Optional: Method to fetch and display user's recipes
   async loadUserRecipes() {
     try {
       const response = await fetch(`${this.API_BASE_URL}/recipes/user/${this.userData.userId}`);
       const recipes = await response.json();
       console.log('User recipes:', recipes);
-      // Update the UI with recipes
       return recipes;
     } catch (error) {
       console.error('Load recipes error:', error);

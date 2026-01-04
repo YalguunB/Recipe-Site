@@ -9,12 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ============================================
-// AUTHENTICATION MIDDLEWARE
-// ============================================
+// AUTHENTICATION 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ error: 'Токен байхгүй байна' });
@@ -24,21 +22,17 @@ const authenticateToken = (req, res, next) => {
     if (err) {
       return res.status(403).json({ error: 'Токен буруу байна' });
     }
-    req.user = user; // { userId: ... }
+    req.user = user; 
     next();
   });
 };
 
-// ============================================
-// HEALTH CHECK
-// ============================================
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK' });
 });
 
-// ============================================
-// AUTHENTICATION ROUTES
-// ============================================
+
+/* AUTHENTICATION ROUTES */
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -70,7 +64,7 @@ app.post('/api/register', async (req, res) => {
   try {
     const { email, password, username } = req.body;
     
-    // Check if user exists
+    /* email бүртгэлтэй эсэхийг шалгах */
     const existingUsers = await db.query('SELECT * FROM users WHERE email = ?', [email]);
     if (existingUsers.length > 0) {
       return res.status(400).json({ error: 'Энэ имэйл аль хэдийн бүртгэлтэй байна' });
@@ -98,15 +92,13 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// ============================================
-// RECIPE ROUTES - CREATE
-// ============================================
+/* RECIPE ROUTES - CREATE */
 app.post('/api/recipes', authenticateToken, async (req, res) => {
   try {
     const { name, type, time, portion, calories, image_url, ingredients, steps, extras } = req.body;
     const userId = req.user.userId;
 
-    // Insert main recipe
+    //гол жор оруулах
     const recipeResult = await db.query(
       'INSERT INTO recipes (user_id, name, type, time, portion, calories, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [userId, name, type, time, portion, calories, image_url || '']
@@ -114,7 +106,7 @@ app.post('/api/recipes', authenticateToken, async (req, res) => {
 
     const recipeId = recipeResult.insertId;
 
-    // Insert ingredients
+    // оруулах орц
     if (ingredients && ingredients.length > 0) {
       for (let i = 0; i < ingredients.length; i++) {
         await db.query(
@@ -124,7 +116,7 @@ app.post('/api/recipes', authenticateToken, async (req, res) => {
       }
     }
 
-    // Insert steps
+    // хийх алхмуудыг оруулах
     if (steps && steps.length > 0) {
       for (let i = 0; i < steps.length; i++) {
         await db.query(
@@ -134,7 +126,7 @@ app.post('/api/recipes', authenticateToken, async (req, res) => {
       }
     }
 
-    // Insert extras
+    // нэмэлт зөвлөмжүүдийг оруулах
     if (extras && extras.length > 0) {
       for (let i = 0; i < extras.length; i++) {
         await db.query(
@@ -154,11 +146,9 @@ app.post('/api/recipes', authenticateToken, async (req, res) => {
   }
 });
 
-// ============================================
 // RECIPE ROUTES - READ
-// ============================================
 
-// Get all recipes (basic info)
+// бүх жорыг үндсэн мэдээллээр авах
 app.get('/api/recipes', async (req, res) => {
   try {
     const recipes = await db.query(`
@@ -183,12 +173,12 @@ app.get('/api/recipes', async (req, res) => {
   }
 });
 
-// Get single recipe with full details
+// нэг жорыг бүх холбоотой мэдээллээр авах
 app.get('/api/recipes/:id', async (req, res) => {
   try {
     const recipeId = req.params.id;
 
-    // Get main recipe info
+    // жорын үндсэн мэдээллээр авах
     const recipes = await db.query(`
       SELECT r.*, u.username, u.email
       FROM recipes r
@@ -202,7 +192,7 @@ app.get('/api/recipes/:id', async (req, res) => {
 
     const recipe = recipes[0];
 
-    // Get ingredients
+    // орцуудыг авах
     const ingredients = await db.query(`
       SELECT ingredient_text
       FROM recipe_ingredients
@@ -210,7 +200,7 @@ app.get('/api/recipes/:id', async (req, res) => {
       ORDER BY sort_order
     `, [recipeId]);
 
-    // Get steps
+    // алхмуудыг авах
     const steps = await db.query(`
       SELECT step_text
       FROM recipe_steps
@@ -218,7 +208,7 @@ app.get('/api/recipes/:id', async (req, res) => {
       ORDER BY sort_order
     `, [recipeId]);
 
-    // Get extras
+    // нэмэлт зөвлөмжүүдийг авах
     const extras = await db.query(`
       SELECT extra_text
       FROM recipe_extras
@@ -226,7 +216,7 @@ app.get('/api/recipes/:id', async (req, res) => {
       ORDER BY sort_order
     `, [recipeId]);
 
-    // Combine all data
+    // бүх мэдээллийг нэгтгэх
     recipe.ingredients = ingredients.map(i => i.ingredient_text);
     recipe.steps = steps.map(s => s.step_text);
     recipe.extras = extras.map(e => e.extra_text);
@@ -238,7 +228,7 @@ app.get('/api/recipes/:id', async (req, res) => {
   }
 });
 
-// Get user's own recipes
+// хэрэглэгчийн жорыг авах
 app.get('/api/recipes/user/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -266,16 +256,15 @@ app.get('/api/recipes/user/:userId', async (req, res) => {
   }
 });
 
-// ============================================
+
 // RECIPE ROUTES - UPDATE
-// ============================================
 app.put('/api/recipes/:id', authenticateToken, async (req, res) => {
   try {
     const recipeId = req.params.id;
     const userId = req.user.userId;
     const { name, type, time, portion, calories, image_url, ingredients, steps, extras } = req.body;
 
-    // Check if recipe belongs to user
+    // жор хэрэглэгчийнх эсэхийг шалгах
     const recipes = await db.query(
       'SELECT * FROM recipes WHERE recipe_id = ? AND user_id = ?',
       [recipeId, userId]
@@ -285,18 +274,18 @@ app.put('/api/recipes/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Та энэ жорыг засах эрхгүй байна' });
     }
 
-    // Update main recipe
+    // гол жорыг шинэчлэх
     await db.query(
       'UPDATE recipes SET name = ?, type = ?, time = ?, portion = ?, calories = ?, image_url = ? WHERE recipe_id = ?',
       [name, type, time, portion, calories, image_url || '', recipeId]
     );
 
-    // Delete old related data
+    // хуучин орц, алхам, нэмэлт зөвлөмжүүдийг устгах
     await db.query('DELETE FROM recipe_ingredients WHERE recipe_id = ?', [recipeId]);
     await db.query('DELETE FROM recipe_steps WHERE recipe_id = ?', [recipeId]);
     await db.query('DELETE FROM recipe_extras WHERE recipe_id = ?', [recipeId]);
 
-    // Insert new ingredients
+    // оруулах шинэ орц
     if (ingredients && ingredients.length > 0) {
       for (let i = 0; i < ingredients.length; i++) {
         await db.query(
@@ -306,7 +295,7 @@ app.put('/api/recipes/:id', authenticateToken, async (req, res) => {
       }
     }
 
-    // Insert new steps
+    // алхмуудыг оруулах
     if (steps && steps.length > 0) {
       for (let i = 0; i < steps.length; i++) {
         await db.query(
@@ -316,7 +305,7 @@ app.put('/api/recipes/:id', authenticateToken, async (req, res) => {
       }
     }
 
-    // Insert new extras
+    // нэмэлт зөвлөмжүүдийг оруулах
     if (extras && extras.length > 0) {
       for (let i = 0; i < extras.length; i++) {
         await db.query(
@@ -333,15 +322,14 @@ app.put('/api/recipes/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// ============================================
+
 // RECIPE ROUTES - DELETE
-// ============================================
 app.delete('/api/recipes/:id', authenticateToken, async (req, res) => {
   try {
     const recipeId = req.params.id;
     const userId = req.user.userId;
 
-    // Check if recipe belongs to user
+    // жор хэрэглэгчийнх эсэхийг шалгах
     const recipes = await db.query(
       'SELECT * FROM recipes WHERE recipe_id = ? AND user_id = ?',
       [recipeId, userId]
@@ -351,7 +339,7 @@ app.delete('/api/recipes/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Та энэ жорыг устгах эрхгүй байна' });
     }
 
-    // Delete recipe (CASCADE will delete related data automatically)
+    //жорын бүх холбоотой мэдээллийг устгах
     await db.query('DELETE FROM recipes WHERE recipe_id = ?', [recipeId]);
 
     res.json({ message: 'Жор амжилттай устгагдлаа' });
@@ -361,9 +349,7 @@ app.delete('/api/recipes/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// ============================================
-// START SERVER
-// ============================================
+//сервер эхлүүлэх
 app.listen(3000, async () => {
   try {
     await db.pool.getConnection();

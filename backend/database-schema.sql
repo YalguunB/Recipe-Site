@@ -26,19 +26,8 @@ INSERT INTO recipes (user_id, name, type, time, portion, calories, image_url) VA
 (1, 'Пицца', 'Итали хоол', 20, '2-3', 300, 'images/pizza.jpg');
 
 
--- ============================================
--- UPDATED DATABASE SCHEMA
--- ============================================
 
--- Add new columns to recipes table
-ALTER TABLE recipes 
-ADD COLUMN ingredients TEXT,
-ADD COLUMN steps TEXT,
-ADD COLUMN extra TEXT;
-
--- OR use the normalized approach with separate tables:
-
--- Table for recipe ingredients
+-- Орц, алхмууд, нэмэлт мэдээллийн хүснэгтүүд
 CREATE TABLE IF NOT EXISTS recipe_ingredients (
     ingredient_id INT AUTO_INCREMENT PRIMARY KEY,
     recipe_id INT NOT NULL,
@@ -47,7 +36,6 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients (
     FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) ON DELETE CASCADE
 );
 
--- Table for recipe steps/instructions
 CREATE TABLE IF NOT EXISTS recipe_steps (
     step_id INT AUTO_INCREMENT PRIMARY KEY,
     recipe_id INT NOT NULL,
@@ -56,7 +44,6 @@ CREATE TABLE IF NOT EXISTS recipe_steps (
     FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) ON DELETE CASCADE
 );
 
--- Table for extra tips/information
 CREATE TABLE IF NOT EXISTS recipe_extras (
     extra_id INT AUTO_INCREMENT PRIMARY KEY,
     recipe_id INT NOT NULL,
@@ -65,41 +52,34 @@ CREATE TABLE IF NOT EXISTS recipe_extras (
     FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id) ON DELETE CASCADE
 );
 
--- Add foreign key constraint if not already added
 ALTER TABLE recipes 
 ADD CONSTRAINT fk_user_recipe 
 FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
--- ============================================
--- CRUD QUERIES WITH RELATED TABLES
--- ============================================
 
--- CREATE: Insert recipe with ingredients and steps
--- Step 1: Insert main recipe
+
+-- Шинэ жор нэмэх (CREATE)
 INSERT INTO recipes (user_id, name, type, time, portion, calories, image_url) 
 VALUES (1, 'Шөл', 'Монгол хоол', 30, '4', 200, 'images/soup.jpg');
 
--- Step 2: Get the inserted recipe_id (use LAST_INSERT_ID() in MySQL)
 SET @recipe_id = LAST_INSERT_ID();
 
--- Step 3: Insert ingredients
 INSERT INTO recipe_ingredients (recipe_id, ingredient_text, sort_order) VALUES
 (@recipe_id, 'Төмс 3 ширхэг', 1),
 (@recipe_id, 'Сонгино 1 ширхэг', 2),
 (@recipe_id, 'Мах 200гр', 3);
 
--- Step 4: Insert steps
+
 INSERT INTO recipe_steps (recipe_id, step_text, sort_order) VALUES
 (@recipe_id, 'Төмсөө хальслаж, усанд хийнэ', 1),
 (@recipe_id, 'Махаа нэмж чанана', 2),
 (@recipe_id, 'Давс, перецээр амтална', 3);
 
--- Step 5: Insert extra tips
 INSERT INTO recipe_extras (recipe_id, extra_text, sort_order) VALUES
 (@recipe_id, 'Шинэ ногоо хэрэглэвэл илүү амттай', 1);
 
 
--- READ: Get recipe with all related data
+
 SELECT 
     r.*,
     u.username,
@@ -115,7 +95,7 @@ LEFT JOIN recipe_extras re ON r.recipe_id = re.recipe_id
 WHERE r.recipe_id = 1
 GROUP BY r.recipe_id;
 
--- READ: Get all recipes with basic info only
+
 SELECT 
     r.recipe_id,
     r.name,
@@ -128,15 +108,12 @@ SELECT
 FROM recipes r
 JOIN users u ON r.user_id = u.user_id;
 
--- READ: Get user's recipes
 SELECT r.*, u.username
 FROM recipes r
 JOIN users u ON r.user_id = u.user_id
 WHERE r.user_id = 1;
 
 
--- UPDATE: Update recipe and its related data
--- Step 1: Update main recipe
 UPDATE recipes 
 SET name = 'Шөл Updated',
     type = 'Монгол хоол',
@@ -145,19 +122,14 @@ SET name = 'Шөл Updated',
     calories = 220
 WHERE recipe_id = 1 AND user_id = 1;
 
--- Step 2: Delete old ingredients/steps/extras
 DELETE FROM recipe_ingredients WHERE recipe_id = 1;
 DELETE FROM recipe_steps WHERE recipe_id = 1;
 DELETE FROM recipe_extras WHERE recipe_id = 1;
 
--- Step 3: Insert new ingredients/steps/extras (same as CREATE)
 
-
--- DELETE: Delete recipe (CASCADE will automatically delete related data)
 DELETE FROM recipes 
 WHERE recipe_id = 1 AND user_id = 1;
 
--- DELETE: Verify user owns the recipe before deleting
 DELETE FROM recipes 
 WHERE recipe_id = 1 
 AND user_id = (SELECT user_id FROM users WHERE user_id = 1);
