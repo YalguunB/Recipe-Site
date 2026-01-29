@@ -155,11 +155,7 @@ export class RecipesInfo extends HTMLElement {
             ${this.createStepsSection(stepsHTML)}
           </aside>
         </section>
-
-        <section class="foods-section">
-          <section class="food-title">
-            <h2>✨Ойролцоо хоолнууд✨</h2>
-          </section>
+            <foods-section title="Ойролцоо хоолнууд"></foods-section-title>
           <section class="food-info">
             ${similarHTML}
           </section>
